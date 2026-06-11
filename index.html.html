@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FB Boost Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4fb;
+  --white:#ffffff;
+  --text:#1a2236;
+  --muted:#6b7a99;
+  --border:#e2e8f5;
+  --blue:#4f8ef7;
+  --indigo:#6366f1;
+  --green:#22c97a;
+  --orange:#ff7b3b;
+  --red:#f43f5e;
+  --purple:#a855f7;
+  --teal:#14b8a6;
+  --radius:14px;
+  --shadow:0 2px 12px rgba(79,142,247,.1);
+  --shadow-md:0 4px 24px rgba(79,142,247,.15);
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px}
+
+/* NAV */
+.nav{background:linear-gradient(135deg,#4f8ef7 0%,#6366f1 100%);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(79,142,247,.3)}
+.nav-logo{color:#fff;font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.nav-back{background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.85rem;display:none;align-items:center;gap:6px}
+.nav-back.show{display:flex}
+.nav-back:hover{background:rgba(255,255,255,.32)}
+
+/* PAGES */
+.page{display:none;animation:fadeIn .22s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.wrap{max-width:1040px;margin:0 auto;padding:22px 16px 80px}
+
+/* RATE PANEL */
+.rate-panel{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;border:1px solid var(--border)}
+.rate-panel-title{font-weight:700;font-size:.88rem;color:var(--text);display:flex;align-items:center;gap:6px}
+.rate-field{display:flex;align-items:center;gap:7px}
+.rate-field label{font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap}
+.rate-field input{width:96px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;color:var(--text);outline:none;font-family:inherit}
+.rate-field input:focus{border-color:var(--blue)}
+.rate-badge{font-size:.7rem;background:#eef2ff;color:var(--blue);padding:2px 8px;border-radius:6px;font-weight:700}
+
+/* SUMMARY CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.card{border-radius:var(--radius);padding:16px 14px;color:#fff;position:relative;min-height:90px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;box-shadow:0 3px 14px rgba(0,0,0,.12)}
+.card::before{content:'';position:absolute;right:-12px;bottom:-12px;width:60px;height:60px;background:rgba(255,255,255,.1);border-radius:50%}
+.card-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.88}
+.card-value{font-size:1.35rem;font-weight:800;margin-top:4px;line-height:1.1;word-break:break-all}
+.card-sub{font-size:.7rem;opacity:.78;margin-top:2px}
+.eye-btn{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.25);border:none;border-radius:6px;cursor:pointer;padding:3px 6px;font-size:.8rem;color:#fff;line-height:1}
+.eye-btn:hover{background:rgba(255,255,255,.42)}
+.c1{background:linear-gradient(135deg,#4f8ef7,#2563eb)}
+.c2{background:linear-gradient(135deg,#6366f1,#4338ca)}
+.c3{background:linear-gradient(135deg,#22c97a,#059669)}
+.c4{background:linear-gradient(135deg,#ff7b3b,#dc2626)}
+.c5{background:linear-gradient(135deg,#a855f7,#7c3aed)}
+.c6{background:linear-gradient(135deg,#14b8a6,#0891b2)}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.sec-title{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.sec-count{background:var(--blue);color:#fff;font-size:.7rem;padding:2px 9px;border-radius:20px;font-weight:700}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;font-size:.84rem;font-weight:600;transition:all .16s;white-space:nowrap;font-family:inherit}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#3a75e0}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#17a866}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#dc2626}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)}.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-soft{background:#eef2ff;color:var(--blue)}.btn-soft:hover{background:#dde6ff}
+.btn-orange{background:var(--orange);color:#fff}.btn-orange:hover{background:#ea6020}
+.btn-sm{padding:5px 11px;font-size:.76rem;border-radius:7px}
+.btn-lg{padding:13px 24px;font-size:.97rem;border-radius:12px;font-weight:700}
+
+/* CLIENT CARDS GRID */
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.client-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.client-card:hover{box-shadow:var(--shadow-md);border-color:#c7d7f9;transform:translateY(-2px)}
+.client-card-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0}
+.client-card-name{font-weight:700;font-size:.97rem}
+.client-card-phone{font-size:.75rem;color:var(--muted);margin-top:2px}
+.client-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{background:var(--bg);border-radius:8px;padding:8px 10px}
+.stat-box-label{font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.stat-box-val{font-size:.92rem;font-weight:700;margin-top:2px}
+.client-card-footer{margin-top:12px;display:flex;align-items:center;justify-content:space-between}
+.status-badge{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px}
+.status-due{background:#fff0f3;color:#f43f5e}
+.status-ok{background:#e8faf3;color:#22c97a}
+.status-advance{background:#eef2ff;color:var(--blue)}
+.open-btn{font-size:.78rem;color:var(--blue);font-weight:700;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px}
+.empty-clients{text-align:center;padding:56px 20px;color:var(--muted)}
+.empty-clients .big{font-size:2.5rem;margin-bottom:10px}
+.empty-clients p{font-size:.92rem;line-height:1.6}
+
+/* ── PROFILE PAGE ── */
+.profile-header{background:linear-gradient(135deg,#4f8ef7,#6366f1);border-radius:var(--radius);padding:22px 22px 18px;color:#fff;margin-bottom:20px;box-shadow:var(--shadow-md)}
+.profile-header-top{display:flex;align-items:flex-start;gap:14px}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem;flex-shrink:0}
+.profile-info h2{font-size:1.3rem;font-weight:800}
+.profile-info p{opacity:.82;font-size:.82rem;margin-top:3px}
+.profile-header-btns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn-header{background:rgba(255,255,255,.22);border:none;color:#fff;padding:7px 13px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.8rem;display:flex;align-items:center;gap:5px;transition:background .16s}
+.btn-header:hover{background:rgba(255,255,255,.36)}
+
+/* TABLE CARD */
+.tcard{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px;border:1px solid var(--border)}
+.tcard-header{padding:14px 18px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafbff;flex-wrap:wrap;gap:8px}
+.tcard-title{font-weight:700;font-size:.9rem;display:flex;align-items:center;gap:7px}
+.tcard table{width:100%;border-collapse:collapse}
+.tcard th{background:#f5f7ff;color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;padding:10px 14px;text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap}
+.tcard td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:.86rem;vertical-align:middle}
+.tcard tr:last-child td{border-bottom:none}
+.tcard tbody tr:hover td{background:#f9fbff}
+.tcard-footer{padding:11px 16px;background:#f5f7ff;border-top:1.5px solid var(--border);display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;font-weight:600}
+.tcard-footer span{color:var(--muted)}.tcard-footer strong{color:var(--text)}
+.empty-table{padding:32px 20px;text-align:center;color:var(--muted);font-size:.85rem}
+
+/* PILLS */
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+.pill-blue{background:#eef2ff;color:var(--blue)}
+.pill-green{background:#e8faf3;color:var(--green)}
+.pill-red{background:#fff0f3;color:var(--red)}
+.pill-orange{background:#fff3ec;color:var(--orange)}
+.pill-purple{background:#f5f0ff;color:var(--purple)}
+
+/* REPORT BANNER */
+.report-banner{background:linear-gradient(135deg,#1a2236,#2d3a5a);border-radius:var(--radius);padding:20px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.report-banner-text h3{color:#fff;font-size:.97rem;font-weight:700}
+.report-banner-text p{color:rgba(255,255,255,.6);font-size:.78rem;margin-top:3px}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:300;align-items:flex-end;justify-content:center;padding:0}
+.modal-bg.open{display:flex;animation:bgFade .2s ease}
+@keyframes bgFade{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;animation:slideUp .24s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:#e2e8f5;border-radius:4px;margin:0 auto 18px}
+.modal h3{font-size:1rem;font-weight:800;margin-bottom:18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.92rem;color:var(--text);outline:none;font-family:inherit;transition:border .16s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue)}
+.field textarea{resize:vertical;min-height:60px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a2236;color:#fff;padding:10px 22px;border-radius:10px;font-size:.86rem;font-weight:600;z-index:999;opacity:0;pointer-events:none;transition:all .28s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* CONFIRM MODAL (centered) */
+.modal-center .modal{border-radius:16px;max-width:360px;margin:auto;animation:scaleIn .2s ease}
+.modal-center{align-items:center}
+@keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+
+@media(max-width:600px){
+  .cards{grid-template-columns:1fr 1fr}
+  .clients-grid{grid-template-columns:1fr}
+  .field-row{grid-template-columns:1fr}
+  .wrap{padding:14px 12px 70px}
+  .profile-header-btns{width:100%;margin-top:8px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">📊 FB Boost Tracker</div>
+  <button class="nav-back" id="navBack" onclick="goHome()">← ফিরে যান</button>
+</nav>
+
+<!-- ════════════════ HOME PAGE ════════════════ -->
+<div class="page active" id="homePage">
+<div class="wrap">
+
+  <!-- RATE PANEL -->
+  <div class="rate-panel">
+    <span class="rate-panel-title">⚙️ ডলার রেট</span>
+    <div class="rate-field">
+      <label>আমার রেট</label>
+      <input type="number" id="myRate" value="123.60" step="0.01" min="0" oninput="refreshHome()">
+      <span class="rate-badge">৳/USD</span>
+    </div>
+    <div class="rate-field">
+      <label>ক্লায়েন্ট রেট</label>
+      <input type="number" id="clientRate" value="150" step="0.01" min="0" oninput="refreshHome()">
+      <span class="rate-badge">৳/USD</span>
+    </div>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="cards" id="homeCards"></div>
+
+  <!-- CLIENTS -->
+  <div class="sec-hdr">
+    <div class="sec-title">👥 সব ক্লায়েন্ট <span class="sec-count" id="clientCount">0</span></div>
+    <button class="btn btn-primary" onclick="openModal('addClientModal')">+ ক্লায়েন্ট যোগ করুন</button>
+  </div>
+  <div class="clients-grid" id="clientsGrid"></div>
+
+</div>
+</div>
+
+<!-- ════════════════ PROFILE PAGE ════════════════ -->
+<div class="page" id="profilePage">
+<div class="wrap">
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="profile-header-top">
+      <div class="profile-avatar" id="profAvatar">?</div>
+      <div class="profile-info">
+        <h2 id="profName">—</h2>
+        <p id="profPhone">—</p>
+        <p id="profNotes" style="margin-top:2px;font-size:.78rem;opacity:.7"></p>
+      </div>
+      <div class="profile-header-btns">
+        <button class="btn-header" onclick="openEditClient()">✏️ এডিট</button>
+        <button class="btn-header" onclick="openDeleteClient()">🗑️ ডিলিট</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RATE PANEL (profile) -->
+  <div class="rate-panel" style="margin-bottom:20px">
+    <span class="rate-panel-title">⚙️ ডলার রেট</span>
+    <div class="rate-field">
+      <label>আমার রেট</label>
+      <input type="number" id="pMyRate" step="0.01" min="0" oninput="syncAndRefresh()">
+      <span class="rate-badge">৳/USD</span>
+    </div>
+    <div class="rate-field">
+      <label>ক্লায়েন্ট রেট</label>
+      <input type="number" id="pClientRate" step="0.01" min="0" oninput="syncAndRefresh()">
+      <span class="rate-badge">৳/USD</span>
+    </div>
+  </div>
+
+  <!-- PROFILE CARDS -->
+  <div class="cards" id="profCards"></div>
+
+  <!-- REPORT BANNER -->
+  <div class="report-banner">
+    <div class="report-banner-text">
+      <h3>📄 ক্লায়েন্ট রিপোর্ট ডাউনলোড</h3>
+      <p>WhatsApp-এ শেয়ার করার জন্য সুন্দর PNG রিপোর্ট</p>
+    </div>
+    <button class="btn btn-lg" style="background:#fff;color:var(--blue)" onclick="downloadReport()">⬇️ রিপোর্ট ডাউনলোড</button>
+  </div>
+
+  <!-- ADS TABLE -->
+  <div class="tcard">
+    <div class="tcard-header">
+      <div class="tcard-title">🎯 বিজ্ঞাপন (Ads)</div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('addAdModal')">+ নতুন Ad যোগ</button>
+    </div>
+    <table>
+      <thead><tr>
+        <th>তারিখ</th><th>Ad নাম</th><th>$ খরচ</th><th>ক্লায়েন্ট চার্জ</th><th></th>
+      </tr></thead>
+      <tbody id="adsBody"></tbody>
+    </table>
+    <div class="tcard-footer" id="adsTotals"></div>
+  </div>
+
+  <!-- PAYMENTS TABLE -->
+  <div class="tcard">
+    <div class="tcard-header">
+      <div class="tcard-title">💳 পেমেন্ট</div>
+      <button class="btn btn-green btn-sm" onclick="openModal('addPayModal')">+ পেমেন্ট যোগ</button>
+    </div>
+    <table>
+      <thead><tr>
+        <th>তারিখ</th><th>পরিমাণ (৳)</th><th>নোট</th><th></th>
+      </tr></thead>
+      <tbody id="paysBody"></tbody>
+    </table>
+    <div class="tcard-footer" id="payTotals"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════ MODALS ════════════════ -->
+
+<!-- ADD/EDIT CLIENT -->
+<div class="modal-bg" id="addClientModal" onclick="bgClose(event,'addClientModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="clientModalTitle">নতুন ক্লায়েন্ট যোগ করুন</h3>
+    <input type="hidden" id="editClientId">
+    <div class="field"><label>ক্লায়েন্টের নাম *</label><input id="fCName" placeholder="যেমন: রফি স্টোর"></div>
+    <div class="field"><label>ফোন নম্বর (ঐচ্ছিক)</label><input id="fCPhone" placeholder="01700000000"></div>
+    <div class="field"><label>নোট (ঐচ্ছিক)</label><textarea id="fCNotes" placeholder="যেকোনো মন্তব্য..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addClientModal')">বাতিল</button>
+      <button class="btn btn-primary" onclick="saveClient()">💾 সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT AD -->
+<div class="modal-bg" id="addAdModal" onclick="bgClose(event,'addAdModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="adModalTitle">নতুন Ad যোগ করুন</h3>
+    <input type="hidden" id="editAdId">
+    <div class="field"><label>Ad-এর নাম *</label><input id="fAName" placeholder="যেমন: Summer Sale Ad 1"></div>
+    <div class="field-row">
+      <div class="field"><label>তারিখ *</label><input type="date" id="fADate"></div>
+      <div class="field"><label>ডলার খরচ ($) *</label><input type="number" id="fASpend" placeholder="0" min="0" step="0.01"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addAdModal')">বাতিল</button>
+      <button class="btn btn-primary" onclick="saveAd()">💾 সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT PAYMENT -->
+<div class="modal-bg" id="addPayModal" onclick="bgClose(event,'addPayModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="payModalTitle">পেমেন্ট যোগ করুন</h3>
+    <input type="hidden" id="editPayId">
+    <div class="field-row">
+      <div class="field"><label>তারিখ *</label><input type="date" id="fPDate"></div>
+      <div class="field"><label>পরিমাণ (৳) *</label><input type="number" id="fPAmount" placeholder="0" min="0"></div>
+    </div>
+    <div class="field"><label>নোট (ঐচ্ছিক)</label><input id="fPNote" placeholder="যেমন: bKash পেমেন্ট"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('addPayModal')">বাতিল</button>
+      <button class="btn btn-green" onclick="savePay()">💾 সেভ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE CLIENT -->
+<div class="modal-bg modal-center" id="delClientModal" onclick="bgClose(event,'delClientModal')">
+  <div class="modal" style="border-radius:16px;max-width:360px;margin:auto">
+    <div class="modal-handle"></div>
+    <h3>⚠️ ক্লায়েন্ট ডিলিট করবেন?</h3>
+    <p style="color:var(--muted);font-size:.88rem;margin-top:6px;line-height:1.6"><span id="delClientName" style="font-weight:700;color:var(--text)"></span>-এর সব তথ্য, Ad এবং পেমেন্ট মুছে যাবে।</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('delClientModal')">বাতিল</button>
+      <button class="btn btn-red" onclick="confirmDeleteClient()">হ্যাঁ, ডিলিট করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- HIDDEN CANVAS FOR REPORT -->
+<canvas id="reportCanvas" style="display:none;position:fixed;left:-9999px"></canvas>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA LAYER
+// ═══════════════════════════════════════════════
+let DB = JSON.parse(localStorage.getItem('fbt_v3') || '{"clients":[]}');
+let CID = null; // current client id
+let hideProfit = false;
+let hideCost = false;
+
+function saveDB(){ localStorage.setItem('fbt_v3', JSON.stringify(DB)); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+function getRate(which){
+  // always read from whichever fields are visible
+  const id = which==='my' ? (document.getElementById('pMyRate').offsetParent?'pMyRate':'myRate')
+                           : (document.getElementById('pClientRate').offsetParent?'pClientRate':'clientRate');
+  return parseFloat(document.getElementById(id).value)||0;
+}
+
+function calc(c){
+  const mr=getRate('my'), cr=getRate('client');
+  const ads=c.ads||[], pays=c.payments||[];
+  const totalSpend = ads.reduce((s,a)=>s+(+a.spend||0),0);
+  const myCost = totalSpend * mr;
+  const totalCharge = totalSpend * cr;
+  const totalPaid = pays.reduce((s,p)=>s+(+p.amount||0),0);
+  const due = Math.max(0, totalCharge - totalPaid);
+  const advance = Math.max(0, totalPaid - totalCharge);
+  const profit = totalCharge - myCost;
+  return {totalSpend,myCost,totalCharge,totalPaid,due,advance,profit};
+}
+
+function fmtN(n, d=2){ return (+n||0).toLocaleString('en',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtDate(s){
+  if(!s) return '—';
+  const [y,m,d]=s.split('-');
+  const mn=['জানু','ফেব্রু','মার্চ','এপ্রি','মে','জুন','জুলা','আগস্ট','সেপ্টে','অক্টো','নভে','ডিসে'];
+  return `${parseInt(d)} ${mn[parseInt(m)-1]}`;
+}
+function avatarColor(name){
+  const cs=['#4f8ef7','#6366f1','#22c97a','#ff7b3b','#a855f7','#14b8a6','#f43f5e','#f59e0b'];
+  let h=0; for(const c of (name||'?')) h=(h*31+c.charCodeAt(0))%cs.length;
+  return cs[h];
+}
+function initials(name){
+  return (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+}
+function esc(s){ const d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+
+// ═══════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════
+function goHome(){
+  CID=null;
+  document.getElementById('homePage').classList.add('active');
+  document.getElementById('profilePage').classList.remove('active');
+  document.getElementById('navBack').classList.remove('show');
+  refreshHome();
+}
+
+function openProfile(cid){
+  CID=cid;
+  // sync rate fields
+  document.getElementById('pMyRate').value = document.getElementById('myRate').value;
+  document.getElementById('pClientRate').value = document.getElementById('clientRate').value;
+  document.getElementById('homePage').classList.remove('active');
+  document.getElementById('profilePage').classList.add('active');
+  document.getElementById('navBack').classList.add('show');
+  window.scrollTo(0,0);
+  renderProfile();
+}
+
+function syncAndRefresh(){
+  document.getElementById('myRate').value = document.getElementById('pMyRate').value;
+  document.getElementById('clientRate').value = document.getElementById('pClientRate').value;
+  renderProfile();
+}
+
+// ═══════════════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════════════
+function refreshHome(){
+  // sync profile rates if profile exists
+  document.getElementById('pMyRate').value = document.getElementById('myRate').value;
+  document.getElementById('pClientRate').value = document.getElementById('clientRate').value;
+
+  let totSpend=0,totCost=0,totCharge=0,totPaid=0,totDue=0,totProfit=0;
+  DB.clients.forEach(c=>{
+    const r=calc(c);
+    totSpend+=r.totalSpend; totCost+=r.myCost;
+    totCharge+=r.totalCharge; totPaid+=r.totalPaid;
+    totDue+=r.due; totProfit+=r.profit;
+  });
+
+  const cardsData=[
+    {lbl:'মোট $ খরচ', val:'$'+fmtN(totSpend), sub:DB.clients.length+' ক্লায়েন্ট', cls:'c1'},
+    {lbl:'আমার খরচ', val:hideCost?'••••••':'৳'+fmtN(totCost), cls:'c2', eye:true, which:'cost'},
+    {lbl:'মোট পেমেন্ট', val:'৳'+fmtN(totPaid), cls:'c3'},
+    {lbl:'মোট বাকি', val:'৳'+fmtN(totDue), cls:'c4'},
+    {lbl:'আমার লাভ', val:hideProfit?'••••••':'৳'+fmtN(totProfit), cls:'c5', eye:true, which:'profit'},
+  ];
+  document.getElementById('homeCards').innerHTML = cardsData.map(c=>`
+    <div class="card ${c.cls}">
+      ${c.eye?`<button class="eye-btn" onclick="toggleEye('${c.which}',event)">👁</button>`:''}
+      <div class="card-label">${c.lbl}</div>
+      <div class="card-value">${c.val}</div>
+    </div>`).join('');
+
+  document.getElementById('clientCount').textContent = DB.clients.length;
+  renderClientsGrid();
+}
+
+function toggleEye(which,e){
+  e.stopPropagation();
+  if(which==='profit') hideProfit=!hideProfit;
+  else hideCost=!hideCost;
+  refreshHome();
+}
+
+function renderClientsGrid(){
+  const grid=document.getElementById('clientsGrid');
+  if(!DB.clients.length){
+    grid.innerHTML=`<div class="empty-clients" style="grid-column:1/-1">
+      <div class="big">👥</div>
+      <p>কোনো ক্লায়েন্ট নেই।<br><strong>+ ক্লায়েন্ট যোগ করুন</strong> বোতামে ক্লিক করুন।</p>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = DB.clients.map(c=>{
+    const r=calc(c);
+    const col=avatarColor(c.name);
+    const statusHTML = r.due>0
+      ? `<span class="status-badge status-due">বাকি ৳${fmtN(r.due)}</span>`
+      : r.advance>0
+        ? `<span class="status-badge status-advance">অগ্রিম ৳${fmtN(r.advance)}</span>`
+        : `<span class="status-badge status-ok">✔ পরিশোধিত</span>`;
+    return `<div class="client-card" onclick="openProfile('${c.id}')">
+      <div class="client-card-top">
+        <div class="avatar" style="background:${col}">${initials(c.name)}</div>
+        <div>
+          <div class="client-card-name">${esc(c.name)}</div>
+          ${c.phone?`<div class="client-card-phone">📞 ${esc(c.phone)}</div>`:''}
+        </div>
+      </div>
+      <div class="client-card-stats">
+        <div class="stat-box">
+          <div class="stat-box-label">$ খরচ</div>
+          <div class="stat-box-val" style="color:var(--blue)">$${fmtN(r.totalSpend)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">মোট বিল</div>
+          <div class="stat-box-val" style="color:var(--purple)">৳${fmtN(r.totalCharge)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">পেয়েছি</div>
+          <div class="stat-box-val" style="color:var(--green)">৳${fmtN(r.totalPaid)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">Ads</div>
+          <div class="stat-box-val">${(c.ads||[]).length}টি</div>
+        </div>
+      </div>
+      <div class="client-card-footer">
+        ${statusHTML}
+        <span class="open-btn">বিস্তারিত দেখুন →</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  PROFILE RENDER
+// ═══════════════════════════════════════════════
+function renderProfile(){
+  const c=DB.clients.find(x=>x.id===CID);
+  if(!c) return;
+  const r=calc(c);
+  const col=avatarColor(c.name);
+
+  // header
+  document.getElementById('profAvatar').textContent=initials(c.name);
+  document.getElementById('profAvatar').style.background='rgba(255,255,255,.22)';
+  document.getElementById('profName').textContent=c.name;
+  document.getElementById('profPhone').textContent=c.phone?'📞 '+c.phone:'ফোন নম্বর নেই';
+  document.getElementById('profNotes').textContent=c.notes?'📝 '+c.notes:'';
+
+  // PROFILE CARDS
+  const pcards=[
+    {lbl:'মোট $ খরচ', val:'$'+fmtN(r.totalSpend), cls:'c1'},
+    {lbl:'মোট বিল', val:'৳'+fmtN(r.totalCharge), cls:'c2'},
+    {lbl:'পেয়েছি', val:'৳'+fmtN(r.totalPaid), cls:'c3'},
+    {lbl:'বাকি আছে', val:'৳'+fmtN(r.due), cls:r.due>0?'c4':'c3'},
+    {lbl:'অগ্রিম', val:'৳'+fmtN(r.advance), cls:'c6'},
+    {lbl:'আমার লাভ', val:hideProfit?'••••••':'৳'+fmtN(r.profit), cls:'c5', eye:true, which:'profit'},
+  ];
+  document.getElementById('profCards').innerHTML = pcards.map(c=>`
+    <div class="card ${c.cls}">
+      ${c.eye?`<button class="eye-btn" onclick="toggleEyeP('${c.which}',event)">👁</button>`:''}
+      <div class="card-label">${c.lbl}</div>
+      <div class="card-value">${c.val}</div>
+    </div>`).join('');
+
+  // ADS TABLE
+  const ads=[...(c.ads||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  const adsBody=document.getElementById('adsBody');
+  if(!ads.length){
+    adsBody.innerHTML='<tr><td colspan="5"><div class="empty-table">কোনো Ad নেই। উপরের বোতামে ক্লিক করে যোগ করুন।</div></td></tr>';
+  } else {
+    const mr=getRate('my'), cr=getRate('client');
+    adsBody.innerHTML=ads.map(a=>{
+      const sp=+a.spend||0;
+      return `<tr>
+        <td><span class="pill pill-blue">${fmtDate(a.date)}</span></td>
+        <td style="font-weight:600">${esc(a.name)}</td>
+        <td style="font-weight:700;color:var(--blue)">$${fmtN(sp)}</td>
+        <td style="font-weight:700;color:var(--purple)">৳${fmtN(sp*cr)}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="openEditAd('${a.id}',event)">✏️</button>
+          <button class="btn btn-red btn-sm" style="margin-left:4px" onclick="deleteAd('${a.id}',event)">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  // ads totals
+  const tSpend=ads.reduce((s,a)=>s+(+a.spend||0),0);
+  const mr=getRate('my'), cr=getRate('client');
+  document.getElementById('adsTotals').innerHTML=`
+    <span>মোট: <strong>$${fmtN(tSpend)}</strong></span>
+    <span>আমার খরচ: <strong>৳${fmtN(tSpend*mr)}</strong></span>
+    <span>ক্লায়েন্ট চার্জ: <strong>৳${fmtN(tSpend*cr)}</strong></span>`;
+
+  // PAYMENTS TABLE
+  const pays=[...(c.payments||[])].sort((a,b)=>b.date.localeCompare(a.date));
+  const paysBody=document.getElementById('paysBody');
+  if(!pays.length){
+    paysBody.innerHTML='<tr><td colspan="4"><div class="empty-table">কোনো পেমেন্ট নেই। উপরের বোতামে ক্লিক করে যোগ করুন।</div></td></tr>';
+  } else {
+    paysBody.innerHTML=pays.map(p=>`<tr>
+      <td><span class="pill pill-green">${fmtDate(p.date)}</span></td>
+      <td style="font-weight:700;color:var(--green)">৳${fmtN(p.amount)}</td>
+      <td style="color:var(--muted);font-size:.82rem">${p.note?esc(p.note):'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="openEditPay('${p.id}',event)">✏️</button>
+        <button class="btn btn-red btn-sm" style="margin-left:4px" onclick="deletePay('${p.id}',event)">✕</button>
+      </td>
+    </tr>`).join('');
+  }
+  const tPaid=pays.reduce((s,p)=>s+(+p.amount||0),0);
+  document.getElementById('payTotals').innerHTML=`
+    <span>মোট পেয়েছি: <strong style="color:var(--green)">৳${fmtN(tPaid)}</strong></span>
+    <span>বাকি: <strong style="color:${r.due>0?'var(--red)':'var(--green)'}">৳${fmtN(r.due)}</strong></span>
+    ${r.advance>0?`<span>অগ্রিম: <strong style="color:var(--blue)">৳${fmtN(r.advance)}</strong></span>`:''}`;
+}
+
+function toggleEyeP(which,e){
+  e.stopPropagation();
+  if(which==='profit') hideProfit=!hideProfit;
+  else hideCost=!hideCost;
+  renderProfile(); refreshHome();
+}
+
+// ═══════════════════════════════════════════════
+//  CLIENT CRUD
+// ═══════════════════════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function bgClose(e,id){ if(e.target.id===id) closeModal(id); }
+
+function openAddClientForm(){
+  document.getElementById('clientModalTitle').textContent='নতুন ক্লায়েন্ট যোগ করুন';
+  document.getElementById('editClientId').value='';
+  document.getElementById('fCName').value='';
+  document.getElementById('fCPhone').value='';
+  document.getElementById('fCNotes').value='';
+  openModal('addClientModal');
+}
+
+function openEditClient(){
+  const c=DB.clients.find(x=>x.id===CID);
+  if(!c) return;
+  document.getElementById('clientModalTitle').textContent='ক্লায়েন্ট এডিট করুন';
+  document.getElementById('editClientId').value=c.id;
+  document.getElementById('fCName').value=c.name;
+  document.getElementById('fCPhone').value=c.phone||'';
+  document.getElementById('fCNotes').value=c.notes||'';
+  openModal('addClientModal');
+}
+
+function saveClient(){
+  const name=document.getElementById('fCName').value.trim();
+  if(!name){ toast('ক্লায়েন্টের নাম দিন'); return; }
+  const eid=document.getElementById('editClientId').value;
+  if(eid){
+    const c=DB.clients.find(x=>x.id===eid);
+    c.name=name; c.phone=document.getElementById('fCPhone').value.trim(); c.notes=document.getElementById('fCNotes').value.trim();
+    toast('ক্লায়েন্ট আপডেট হয়েছে ✓');
+    if(CID===eid) renderProfile();
+  } else {
+    DB.clients.push({id:uid(),name,phone:document.getElementById('fCPhone').value.trim(),notes:document.getElementById('fCNotes').value.trim(),ads:[],payments:[]});
+    toast('ক্লায়েন্ট যোগ হয়েছে ✓');
+  }
+  saveDB(); closeModal('addClientModal'); refreshHome();
+}
+
+function openDeleteClient(){
+  const c=DB.clients.find(x=>x.id===CID);
+  document.getElementById('delClientName').textContent=c.name;
+  openModal('delClientModal');
+}
+function confirmDeleteClient(){
+  DB.clients=DB.clients.filter(c=>c.id!==CID);
+  saveDB(); closeModal('delClientModal');
+  toast('ক্লায়েন্ট ডিলিট হয়েছে');
+  goHome();
+}
+
+// ═══════════════════════════════════════════════
+//  AD CRUD
+// ═══════════════════════════════════════════════
+function openAddAd(){
+  document.getElementById('adModalTitle').textContent='নতুন Ad যোগ করুন';
+  document.getElementById('editAdId').value='';
+  document.getElementById('fAName').value='';
+  document.getElementById('fADate').value=today();
+  document.getElementById('fASpend').value='';
+  openModal('addAdModal');
+}
+function openEditAd(id,e){
+  if(e) e.stopPropagation();
+  const c=DB.clients.find(x=>x.id===CID);
+  const a=c.ads.find(x=>x.id===id);
+  document.getElementById('adModalTitle').textContent='Ad এডিট করুন';
+  document.getElementById('editAdId').value=id;
+  document.getElementById('fAName').value=a.name;
+  document.getElementById('fADate').value=a.date;
+  document.getElementById('fASpend').value=a.spend;
+  openModal('addAdModal');
+}
+function saveAd(){
+  const name=document.getElementById('fAName').value.trim();
+  const date=document.getElementById('fADate').value;
+  const spend=parseFloat(document.getElementById('fASpend').value)||0;
+  if(!name){ toast('Ad-এর নাম দিন'); return; }
+  if(!date){ toast('তারিখ দিন'); return; }
+  const c=DB.clients.find(x=>x.id===CID);
+  const eid=document.getElementById('editAdId').value;
+  if(eid){ const a=c.ads.find(x=>x.id===eid); a.name=name;a.date=date;a.spend=spend; toast('Ad আপডেট হয়েছে ✓'); }
+  else { c.ads.push({id:uid(),name,date,spend}); toast('Ad যোগ হয়েছে ✓'); }
+  saveDB(); closeModal('addAdModal'); renderProfile(); refreshHome();
+}
+function deleteAd(id,e){
+  if(e) e.stopPropagation();
+  if(!confirm('এই Ad ডিলিট করবেন?')) return;
+  const c=DB.clients.find(x=>x.id===CID);
+  c.ads=c.ads.filter(a=>a.id!==id);
+  saveDB(); renderProfile(); refreshHome(); toast('Ad ডিলিট হয়েছে');
+}
+
+// ═══════════════════════════════════════════════
+//  PAYMENT CRUD
+// ═══════════════════════════════════════════════
+function openAddPay(){
+  document.getElementById('payModalTitle').textContent='পেমেন্ট যোগ করুন';
+  document.getElementById('editPayId').value='';
+  document.getElementById('fPDate').value=today();
+  document.getElementById('fPAmount').value='';
+  document.getElementById('fPNote').value='';
+  openModal('addPayModal');
+}
+function openEditPay(id,e){
+  if(e) e.stopPropagation();
+  const c=DB.clients.find(x=>x.id===CID);
+  const p=c.payments.find(x=>x.id===id);
+  document.getElementById('payModalTitle').textContent='পেমেন্ট এডিট করুন';
+  document.getElementById('editPayId').value=id;
+  document.getElementById('fPDate').value=p.date;
+  document.getElementById('fPAmount').value=p.amount;
+  document.getElementById('fPNote').value=p.note||'';
+  openModal('addPayModal');
+}
+function savePay(){
+  const date=document.getElementById('fPDate').value;
+  const amount=parseFloat(document.getElementById('fPAmount').value)||0;
+  const note=document.getElementById('fPNote').value.trim();
+  if(!date){ toast('তারিখ দিন'); return; }
+  if(!amount){ toast('পরিমাণ দিন'); return; }
+  const c=DB.clients.find(x=>x.id===CID);
+  const eid=document.getElementById('editPayId').value;
+  if(eid){ const p=c.payments.find(x=>x.id===eid); p.date=date;p.amount=amount;p.note=note; toast('পেমেন্ট আপডেট হয়েছে ✓'); }
+  else { c.payments.push({id:uid(),date,amount,note}); toast('পেমেন্ট যোগ হয়েছে ✓'); }
+  saveDB(); closeModal('addPayModal'); renderProfile(); refreshHome();
+}
+function deletePay(id,e){
+  if(e) e.stopPropagation();
+  if(!confirm('এই পেমেন্ট ডিলিট করবেন?')) return;
+  const c=DB.clients.find(x=>x.id===CID);
+  c.payments=c.payments.filter(p=>p.id!==id);
+  saveDB(); renderProfile(); refreshHome(); toast('পেমেন্ট ডিলিট হয়েছে');
+}
+
+// ═══════════════════════════════════════════════
+//  REPORT GENERATOR
+// ═══════════════════════════════════════════════
+function downloadReport(){
+  const c=DB.clients.find(x=>x.id===CID);
+  if(!c){ toast('ক্লায়েন্ট পাওয়া যায়নি'); return; }
+  const r=calc(c);
+  const cr=getRate('client');
+  const ads=[...(c.ads||[])].sort((a,b)=>a.date.localeCompare(b.date));
+  const pays=[...(c.payments||[])].sort((a,b)=>a.date.localeCompare(b.date));
+
+  const W=640;
+  const rowH=34;
+  const sectionGap=28;
+  const headerH=120;
+  const summaryH=280;
+  const adsH=52+(ads.length||1)*rowH+14;
+  const paysH=52+(pays.length||1)*rowH+14;
+  const footerH=56;
+  const H=headerH+summaryH+adsH+paysH+footerH+sectionGap*3+40;
+
+  const cv=document.getElementById('reportCanvas');
+  cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+
+  // ── BG ──
+  ctx.fillStyle='#f8faff'; ctx.fillRect(0,0,W,H);
+
+  // ── HEADER GRADIENT ──
+  const g=ctx.createLinearGradient(0,0,W,headerH);
+  g.addColorStop(0,'#4f8ef7'); g.addColorStop(1,'#6366f1');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,headerH);
+
+  // header text
+  ctx.fillStyle='rgba(255,255,255,.15)';
+  ctx.beginPath(); ctx.arc(W-40,headerH/2,55,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.font='bold 24px Segoe UI,Arial';
+  ctx.fillText(c.name,28,46);
+  ctx.font='13px Segoe UI,Arial';
+  ctx.fillStyle='rgba(255,255,255,.8)';
+  const dateStr=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+  ctx.fillText('📅 রিপোর্টের তারিখ: '+dateStr,28,72);
+  if(c.phone) ctx.fillText('📞 '+c.phone, 28, 96);
+
+  let y=headerH+26;
+
+  // ── SUMMARY SECTION ──
+  ctx.fillStyle='#1a2236'; ctx.font='bold 13px Segoe UI,Arial';
+  ctx.fillText('📊 অ্যাকাউন্ট সামারি',28,y); y+=14;
+  ctx.strokeStyle='#e2e8f5'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(28,y); ctx.lineTo(W-28,y); ctx.stroke(); y+=16;
+
+  const sumRows=[
+    {label:'মোট ডলার খরচ', val:'$'+fmtN(r.totalSpend), color:'#4f8ef7'},
+    {label:'মোট বিল (ক্লায়েন্ট চার্জ)', val:'৳'+fmtN(r.totalCharge), color:'#6366f1'},
+    {label:'মোট পেয়েছি', val:'৳'+fmtN(r.totalPaid), color:'#22c97a'},
+    {label:'বাকি আছে (Due)', val:'৳'+fmtN(r.due), color:r.due>0?'#f43f5e':'#22c97a'},
+    {label:'অগ্রিম জমা (Advance)', val:'৳'+fmtN(r.advance), color:'#14b8a6'},
+  ];
+  sumRows.forEach((row,i)=>{
+    if(i%2===0){ ctx.fillStyle='#fff'; rr(ctx,28,y,W-56,40,8); ctx.fill(); }
+    else{ ctx.fillStyle='#f5f7ff'; rr(ctx,28,y,W-56,40,8); ctx.fill(); }
+    ctx.strokeStyle='#e8edf8'; ctx.lineWidth=1;
+    rr(ctx,28,y,W-56,40,8); ctx.stroke();
+    ctx.fillStyle='#6b7a99'; ctx.font='12px Segoe UI,Arial';
+    ctx.textAlign='left'; ctx.fillText(row.label,44,y+25);
+    ctx.fillStyle=row.color; ctx.font='bold 16px Segoe UI,Arial';
+    ctx.textAlign='right'; ctx.fillText(row.val,W-42,y+27);
+    y+=46;
+  });
+  ctx.textAlign='left';
+  y+=sectionGap;
+
+  // ── ADS TABLE ──
+  ctx.fillStyle='#1a2236'; ctx.font='bold 13px Segoe UI,Arial';
+  ctx.fillText('🎯 বিজ্ঞাপন (Ads) তালিকা',28,y); y+=14;
+  ctx.strokeStyle='#e2e8f5'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(28,y); ctx.lineTo(W-28,y); ctx.stroke(); y+=12;
+
+  // ads header row
+  ctx.fillStyle='#eef2ff'; rr(ctx,28,y,W-56,30,6); ctx.fill();
+  ctx.fillStyle='#6b7a99'; ctx.font='bold 10px Segoe UI,Arial';
+  ctx.textAlign='left'; ctx.fillText('তারিখ',44,y+19);
+  ctx.fillText('Ad নাম',120,y+19);
+  ctx.textAlign='right'; ctx.fillText('$ খরচ',W-140,y+19);
+  ctx.fillText('ক্লায়েন্ট চার্জ',W-42,y+19);
+  y+=34;
+  ctx.textAlign='left';
+
+  if(!ads.length){
+    ctx.fillStyle='#aab'; ctx.font='12px Segoe UI,Arial';
+    ctx.fillText('কোনো Ad নেই।',44,y+20); y+=34;
+  } else {
+    ads.forEach((a,i)=>{
+      if(i%2===0){ ctx.fillStyle='#fff'; ctx.fillRect(28,y,W-56,rowH); }
+      else { ctx.fillStyle='#fafbff'; ctx.fillRect(28,y,W-56,rowH); }
+      // date badge
+      ctx.fillStyle='#eef2ff'; rr(ctx,36,y+7,60,18,5); ctx.fill();
+      ctx.fillStyle='#4f8ef7'; ctx.font='bold 10px Segoe UI,Arial';
+      ctx.textAlign='center'; ctx.fillText(fmtDate(a.date),66,y+20); ctx.textAlign='left';
+      // name
+      ctx.fillStyle='#1a2236'; ctx.font='13px Segoe UI,Arial';
+      ctx.fillText(a.name.substring(0,28),120,y+22);
+      // spend
+      ctx.fillStyle='#4f8ef7'; ctx.font='bold 13px Segoe UI,Arial';
+      ctx.textAlign='right'; ctx.fillText('$'+fmtN(+a.spend||0),W-140,y+22);
+      ctx.fillStyle='#6366f1';
+      ctx.fillText('৳'+fmtN((+a.spend||0)*cr),W-42,y+22);
+      ctx.textAlign='left';
+      y+=rowH;
+    });
+    // total row
+    ctx.fillStyle='#e8edff'; ctx.fillRect(28,y,W-56,32);
+    ctx.fillStyle='#1a2236'; ctx.font='bold 12px Segoe UI,Arial';
+    ctx.fillText('সর্বমোট',44,y+21);
+    const ts=ads.reduce((s,a)=>s+(+a.spend||0),0);
+    ctx.textAlign='right';
+    ctx.fillStyle='#4f8ef7'; ctx.fillText('$'+fmtN(ts),W-140,y+21);
+    ctx.fillStyle='#6366f1'; ctx.fillText('৳'+fmtN(ts*cr),W-42,y+21);
+    ctx.textAlign='left'; y+=38;
+  }
+  y+=sectionGap;
+
+  // ── PAYMENTS TABLE ──
+  ctx.fillStyle='#1a2236'; ctx.font='bold 13px Segoe UI,Arial';
+  ctx.fillText('💳 পেমেন্ট তালিকা',28,y); y+=14;
+  ctx.strokeStyle='#e2e8f5'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(28,y); ctx.lineTo(W-28,y); ctx.stroke(); y+=12;
+
+  ctx.fillStyle='#e8faf3'; rr(ctx,28,y,W-56,30,6); ctx.fill();
+  ctx.fillStyle='#6b7a99'; ctx.font='bold 10px Segoe UI,Arial';
+  ctx.textAlign='left'; ctx.fillText('তারিখ',44,y+19);
+  ctx.fillText('নোট',160,y+19);
+  ctx.textAlign='right'; ctx.fillText('পরিমাণ (৳)',W-42,y+19);
+  y+=34; ctx.textAlign='left';
+
+  if(!pays.length){
+    ctx.fillStyle='#aab'; ctx.font='12px Segoe UI,Arial';
+    ctx.fillText('কোনো পেমেন্ট নেই।',44,y+20); y+=34;
+  } else {
+    pays.forEach((p,i)=>{
+      if(i%2===0){ ctx.fillStyle='#fff'; ctx.fillRect(28,y,W-56,rowH); }
+      else { ctx.fillStyle='#f8fff9'; ctx.fillRect(28,y,W-56,rowH); }
+      ctx.fillStyle='#e8faf3'; rr(ctx,36,y+7,60,18,5); ctx.fill();
+      ctx.fillStyle='#22c97a'; ctx.font='bold 10px Segoe UI,Arial';
+      ctx.textAlign='center'; ctx.fillText(fmtDate(p.date),66,y+20); ctx.textAlign='left';
+      ctx.fillStyle='#6b7a99'; ctx.font='12px Segoe UI,Arial';
+      ctx.fillText((p.note||'—').substring(0,30),160,y+22);
+      ctx.fillStyle='#22c97a'; ctx.font='bold 14px Segoe UI,Arial';
+      ctx.textAlign='right'; ctx.fillText('৳'+fmtN(+p.amount||0),W-42,y+22);
+      ctx.textAlign='left'; y+=rowH;
+    });
+    const tp=pays.reduce((s,p)=>s+(+p.amount||0),0);
+    ctx.fillStyle='#d1fae5'; ctx.fillRect(28,y,W-56,32);
+    ctx.fillStyle='#1a2236'; ctx.font='bold 12px Segoe UI,Arial';
+    ctx.fillText('মোট পেয়েছি',44,y+21);
+    ctx.fillStyle='#22c97a'; ctx.textAlign='right';
+    ctx.fillText('৳'+fmtN(tp),W-42,y+21);
+    ctx.textAlign='left'; y+=38;
+  }
+
+  y+=10;
+  // ── FOOTER ──
+  ctx.fillStyle='#e2e8f5'; ctx.fillRect(0,y,W,1); y+=14;
+  ctx.fillStyle='#aab3c5'; ctx.font='11px Segoe UI,Arial';
+  ctx.fillText('FB Boost Tracker  ·  ক্লায়েন্ট রেট: ৳'+fmtN(cr,2)+'/USD  ·  '+dateStr,28,y+14);
+
+  // DOWNLOAD
+  const link=document.createElement('a');
+  link.download=`Report_${c.name.replace(/\s+/g,'_')}_${today()}.png`;
+  link.href=cv.toDataURL('image/png');
+  link.click();
+  toast('রিপোর্ট ডাউনলোড হচ্ছে... ✓');
+}
+
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+let _toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ═══════════════════════════════════════════════
+//  WIRE ADD CLIENT BUTTON ON HOME
+// ═══════════════════════════════════════════════
+document.querySelector('[onclick="openModal(\'addClientModal\')"]')
+  .setAttribute('onclick',"openAddClientForm()");
+
+// INIT
+refreshHome();
+</script>
+</body>
+</html>
